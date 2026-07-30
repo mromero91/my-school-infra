@@ -1,0 +1,26 @@
+project_id  = "your-gcp-project-id"
+region      = "us-central1"
+environment = "staging"
+
+# Don't put real secrets in a committed .tfvars file. Either:
+#   - copy this to terraform.tfvars (gitignored) and fill them in, or
+#   - pass them at apply time: terraform apply -var="db_password=..."
+# db_password        = ""
+# jwt_secret         = ""
+# jwt_refresh_secret = ""
+
+# Placeholder images — replace once the first real image is pushed to
+# Artifact Registry (see outputs.artifact_registry_repository after apply).
+backend_image  = "us-docker.pkg.dev/cloudrun/container/hello:latest"
+frontend_image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
+
+# Optional Cloud Run domain mappings. Domain (or parent) must be verified in
+# Google Search Console for this GCP project. After apply, create the CNAMEs
+# from `terraform output domain_dns_records` at your DNS provider.
+# frontend_domain = "school-staging.m-romero.dev"
+# backend_domain  = "school-staging-api.m-romero.dev"
+
+# Add your IP here if you need `prisma migrate deploy` from your machine
+# against the staging DB. Cloud Run itself doesn't need this.
+# authorized_networks = [{ name = "my-ip", cidr = "203.0.113.4/32" }]
+authorized_networks = []
