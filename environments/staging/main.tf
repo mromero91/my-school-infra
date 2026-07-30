@@ -108,12 +108,17 @@ module "backend_service" {
     GCP_BUCKET_NAME = module.uploads_bucket.bucket_name
     GCP_PROJECT_ID  = var.project_id
     FRONTEND_URL    = local.frontend_url
+    SENDGRID_FROM_EMAIL = "no-reply@m-romero.dev"
+    SENDGRID_FROM_NAME  = "No responder"
   }
 
   secret_env_vars = {
     DATABASE_URL       = { secret_id = module.secrets.secret_ids["${local.name_prefix}-database-url"] }
     JWT_SECRET         = { secret_id = module.secrets.secret_ids["${local.name_prefix}-jwt-secret"] }
     JWT_REFRESH_SECRET = { secret_id = module.secrets.secret_ids["${local.name_prefix}-jwt-refresh-secret"] }
+    SENDGRID_API_KEY     = { secret_id = "school-staging-sendgrid-api-key" }
+    TWILIO_AUTH_TOKEN    = { secret_id = "school-staging-twilio-auth-token" }
+    TWILIO_ACCOUNT_SID   = { secret_id = "school-staging-twilio-account-sid" }
   }
 }
 
