@@ -125,6 +125,7 @@ module "migrate_job" {
   project_id                        = var.project_id
   region                            = var.region
   job_name                          = "${local.name_prefix}-migrate"
+  container_name                    = "migrate"
   image                             = var.backend_image
   service_account_email             = module.backend_sa.email
   cloudsql_instance_connection_name = module.database.connection_name
@@ -134,6 +135,32 @@ module "migrate_job" {
 
   env_vars = {
     NODE_ENV = var.environment
+  }
+
+  secret_env_vars = {
+    DATABASE_URL = { secret_id = module.secrets.secret_ids["${local.name_prefix}-database-url"] }
+  }
+}
+
+# Idempotent demo/bootstrap seed. NOT run by CI — execute manually after
+# migrate when staging needs school/staff fixtures:
+#   gcloud run jobs execute school-staging-seed --wait
+module "seed_job" {
+  source                            = "../../modules/cloud-run-job"
+  project_id                        = var.project_id
+  region                            = var.region
+  job_name                          = "${local.name_prefix}-seed"
+  container_name                    = "seed"
+  image                             = var.backend_image
+  service_account_email             = module.backend_sa.email
+  cloudsql_instance_connection_name = module.database.connection_name
+  command                           = ["node"]
+  args                              = ["dist/prisma/seed.js"]
+  max_retries                       = 0
+
+  env_vars = {
+    NODE_ENV               = "production"
+    SEED_PRINT_CREDENTIALS = "false"
   }
 
   secret_env_vars = {

@@ -10,6 +10,12 @@ variable "job_name" {
   type = string
 }
 
+variable "container_name" {
+  type        = string
+  default     = "job"
+  description = "Name of the single container in the job template."
+}
+
 variable "image" {
   type        = string
   description = "Initial container image. CI updates this outside Terraform — see lifecycle.ignore_changes."

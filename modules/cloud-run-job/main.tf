@@ -10,7 +10,7 @@ resource "google_cloud_run_v2_job" "this" {
       max_retries     = var.max_retries
 
       containers {
-        name    = "migrate"
+        name    = var.container_name
         image   = var.image
         command = var.command
         args    = var.args

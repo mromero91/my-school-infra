@@ -3,6 +3,11 @@ output "migrate_job_name" {
   value       = module.migrate_job.name
 }
 
+output "seed_job_name" {
+  description = "Cloud Run Job name for manual bootstrap seed (`node dist/prisma/seed.js`)."
+  value       = module.seed_job.name
+}
+
 output "backend_url" {
   description = "Public API base URL (custom domain when set, else *.run.app)."
   value       = module.backend_service.custom_url

@@ -68,7 +68,7 @@ Terraform crea el Cloud Run Job `school-staging-migrate` (mismo image/SA/
 Cloud SQL que el backend). El workflow de `my-school-api` hace, **antes**
 de desplegar la nueva revisión:
 
-1. `gcloud run jobs update … --image=<nueva tag>`
+1. `gcloud run jobs update … --image=<nueva tag>` (migrate + seed)
 2. `gcloud run jobs execute … --wait` → corre `npx prisma migrate deploy`
 3. Solo si eso sale bien → `gcloud run deploy` del servicio
 
@@ -76,8 +76,8 @@ Si el job aún no existe (primer setup), aplica Terraform en staging antes
 del primer push que despliegue:
 
 ```bash
-cd school-infra/environments/staging
-terraform plan   # deberías ver google_cloud_run_v2_job.migrate
+cd my-school-infra/environments/staging
+terraform plan   # deberías ver jobs migrate + seed
 terraform apply
 ```
 
@@ -85,6 +85,17 @@ Hotfix manual (si hace falta sin redeploy):
 
 ```bash
 gcloud run jobs execute school-staging-migrate \
+  --project=school-503805 --region=us-central1 --wait
+```
+
+## 5b. Seed de bootstrap (manual)
+
+Terraform también crea `school-staging-seed` (`node dist/prisma/seed.js`).
+**No** se ejecuta en el pipeline — solo cuando necesitas datos demo
+(escuela, grados, staff). Tras un deploy (imagen actualizada):
+
+```bash
+gcloud run jobs execute school-staging-seed \
   --project=school-503805 --region=us-central1 --wait
 ```
 

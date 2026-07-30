@@ -1,16 +1,41 @@
+# Local .terraform directories (providers, modules cache)
 **/.terraform/*
+
+# State (never commit — remote state lives in GCS)
 *.tfstate
 *.tfstate.*
+*.tfstate.backup
+
+# Crash logs
 crash.log
 crash.*.log
+
+# Variable files often hold secrets — keep only *.example
 *.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
 !*.tfvars.example
+
+# Local overrides
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# CLI config
 .terraformrc
 terraform.rc
+
+# Saved plans
 tfplan
 tfplan.*
+*.tfplan
+
+# OS / editor
 .DS_Store
+.idea/
+*.swp
+*~
+
+# Note: commit .terraform.lock.hcl (provider pins) — do not ignore it.
