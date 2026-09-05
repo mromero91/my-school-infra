@@ -36,6 +36,16 @@ variable "backups_enabled" {
   default = true
 }
 
+variable "availability_type" {
+  type        = string
+  default     = "ZONAL"
+  description = "Cloud SQL availability type: ZONAL (single AZ, no HA) or REGIONAL (HA with automatic failover)"
+  validation {
+    condition     = contains(["ZONAL", "REGIONAL"], var.availability_type)
+    error_message = "Availability type must be ZONAL or REGIONAL."
+  }
+}
+
 variable "database_name" {
   type = string
 }

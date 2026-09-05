@@ -8,7 +8,7 @@ resource "google_sql_database_instance" "this" {
   settings {
     edition           = "ENTERPRISE" # required for shared-core tiers like db-f1-micro — new projects default to ENTERPRISE_PLUS, which rejects them
     tier              = var.tier
-    availability_type = "ZONAL" # no HA — staging only
+    availability_type = var.availability_type
     disk_size         = var.disk_size_gb
     disk_type         = "PD_SSD"
     disk_autoresize   = true
