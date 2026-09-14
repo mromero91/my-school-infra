@@ -48,8 +48,11 @@ module "database" {
   database_password   = var.db_password
   tier                = var.db_instance_class
   authorized_networks = var.authorized_networks
-  availability_type   = "REGIONAL" # Production: Regional HA with automatic failover across AZs
-  backups_enabled     = true       # Production: enable backups with point-in-time recovery
+  # FASE 2: REGIONAL→ZONAL (estimated savings: $167-215/mo)
+  # Rationale: MVP without critical SLA; PITR + backups provide RTO ~30-60min
+  # Mitigates: no automatic failover, but easy rollback if needed
+  availability_type   = "ZONAL"
+  backups_enabled     = true       # PITR maintained; recovery procedure documented
 }
 
 module "redis" {
