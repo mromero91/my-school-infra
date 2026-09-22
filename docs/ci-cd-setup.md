@@ -99,6 +99,36 @@ gcloud run jobs execute school-staging-seed \
   --project=school-503805 --region=us-central1 --wait
 ```
 
+## 5c. Marcar faltas (manual)
+
+Terraform crea `school-<env>-mark-absences` (`node dist/src/jobs/mark-absences.js`).
+Por cada grupo, cuando ya pasó el 40% de su turno (horario de entrada → salida
+configurado en la escuela), crea una falta (`ABSENT`) para cada alumno activo
+que no tiene registro de asistencia ese día. Así las faltas aparecen en la lista
+y se pueden justificar. Es idempotente: correrlo varias veces no duplica nada, y
+si el alumno escanea QR después, su registro pasa a presente/retardo.
+
+```bash
+# Hoy (solo grupos que ya pasaron el corte)
+gcloud run jobs execute school-staging-mark-absences \
+  --project=school-503805 --region=us-central1 --wait
+
+# Vista previa sin escribir
+gcloud run jobs execute school-staging-mark-absences \
+  --project=school-503805 --region=us-central1 --wait \
+  --update-env-vars=DRY_RUN=true
+
+# Un día anterior (ignora el corte)
+gcloud run jobs execute school-staging-mark-absences \
+  --project=school-503805 --region=us-central1 --wait \
+  --update-env-vars=ATTENDANCE_DATE=2026-09-22
+```
+
+Variables: `ABSENCE_CUTOFF_RATIO` (default `0.4`), `ATTENDANCE_DATE`,
+`ABSENCE_FORCE=true` (ignora corte y fin de semana), `DRY_RUN=true`.
+Los grupos sin horario de entrada **y** salida se omiten (queda en el log).
+No hay calendario de días inhábiles: no lo corras en festivos.
+
 ## 6. Primer deploy
 
 Los workflows solo hacen build+push+deploy en `push` (no en pull_request).

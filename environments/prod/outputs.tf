@@ -61,3 +61,8 @@ output "frontend_deployer_email" {
   description = "Value for the `service_account` input in my-school-app's deploy workflow"
   value       = module.frontend_deployer_sa.email
 }
+
+output "mark_absences_job_name" {
+  description = "Cloud Run Job name for marking absences (`node dist/src/jobs/mark-absences.js`)."
+  value       = module.mark_absences_job.name
+}
