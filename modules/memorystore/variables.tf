@@ -34,8 +34,8 @@ variable "memory_size_gb" {
 
 variable "redis_version" {
   type        = string
-  default     = "redis_7_x"
-  description = "Redis version (e.g., redis_7_x)"
+  default     = "REDIS_7_2"
+  description = "Redis version (e.g., REDIS_7_2 for BASIC tier, REDIS_7_2 for STANDARD_HA)"
 }
 
 variable "display_name" {
