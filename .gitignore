@@ -31,6 +31,18 @@ terraform.rc
 tfplan
 tfplan.*
 *.tfplan
+environments/*/tfplan-*
+
+# Terraform backups and temporary files
+*-backup.state
+*.backup
+
+# Temporary deployment artifacts
+DEPLOYMENT_*.md
+FINAL_RESULTS.md
+IMPLEMENTATION_SUMMARY.txt
+MONITORING_POST_DEPLOYMENT.md
+QUICK_REFERENCE.md
 
 # OS / editor
 .DS_Store
