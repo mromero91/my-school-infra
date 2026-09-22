@@ -17,9 +17,7 @@ resource "google_redis_instance" "this" {
   # Access is controlled via VPC peering and IAM roles, not via
   # authorized_networks (which would be for private service access).
   # Cloud Run instances in the same region connect via private IP.
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED prevent_destroy during FASE 1 cost optimization (BASIC tier requires replacement)
 
   labels = var.labels
 }

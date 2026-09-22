@@ -91,3 +91,39 @@ variable "redis_auth_enabled" {
   default     = true
   description = "Enable AUTH for Memorystore Redis (recommended for prod)"
 }
+
+variable "db_availability_type" {
+  type        = string
+  default     = "ZONAL"
+  description = "Cloud SQL availability: ZONAL (single zone, cheaper) or REGIONAL (HA with automatic failover)"
+}
+
+variable "db_disk_size" {
+  type        = string
+  default     = "100"
+  description = "Cloud SQL disk size in GB"
+}
+
+variable "backend_min_instances" {
+  type        = number
+  default     = 1
+  description = "Cloud Run backend minimum instances"
+}
+
+variable "backend_max_instances" {
+  type        = number
+  default     = 5
+  description = "Cloud Run backend maximum instances"
+}
+
+variable "frontend_min_instances" {
+  type        = number
+  default     = 1
+  description = "Cloud Run frontend minimum instances"
+}
+
+variable "frontend_max_instances" {
+  type        = number
+  default     = 5
+  description = "Cloud Run frontend maximum instances"
+}

@@ -48,8 +48,11 @@ module "database" {
   database_password   = var.db_password
   tier                = var.db_instance_class
   authorized_networks = var.authorized_networks
-  availability_type   = "REGIONAL" # Production: Regional HA with automatic failover across AZs
-  backups_enabled     = true       # Production: enable backups with point-in-time recovery
+  # FASE 2: REGIONAL→ZONAL (estimated savings: $167-215/mo)
+  # Rationale: MVP without critical SLA; PITR + backups provide RTO ~30-60min
+  # Mitigates: no automatic failover, but easy rollback if needed
+  availability_type   = "ZONAL"
+  backups_enabled     = true       # PITR maintained; recovery procedure documented
 }
 
 module "redis" {
@@ -274,4 +277,19 @@ resource "google_service_account_iam_member" "frontend_deployer_wif" {
   service_account_id = module.frontend_deployer_sa.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${module.github_oidc.pool_name}/attribute.repository/${var.github_owner}/my-school-app"
+}
+
+# Allow deployers to generate their own access tokens — fixes `gcloud auth docker-helper`
+# refresh errors when pushing to Artifact Registry. Deployers need this to impersonate
+# themselves and obtain short-lived access tokens for Docker authentication.
+resource "google_service_account_iam_member" "backend_deployer_token_creator" {
+  service_account_id = module.backend_deployer_sa.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${module.backend_deployer_sa.email}"
+}
+
+resource "google_service_account_iam_member" "frontend_deployer_token_creator" {
+  service_account_id = module.frontend_deployer_sa.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${module.frontend_deployer_sa.email}"
 }
