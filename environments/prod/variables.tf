@@ -30,13 +30,14 @@ variable "jwt_refresh_secret" {
 
 variable "backend_image" {
   type        = string
-  default     = "us-docker.pkg.dev/cloudrun/container/hello:latest"
-  description = "Placeholder until the first real image is pushed to Artifact Registry and deployed via CI/`gcloud run deploy`."
+  default     = "us-central1-docker.pkg.dev/school-503805/school-prod/backend:latest"
+  description = "Backend image pushed to Artifact Registry by CI/CD (GitHub Actions deploy-prod.yml)"
 }
 
 variable "frontend_image" {
-  type    = string
-  default = "us-docker.pkg.dev/cloudrun/container/hello:latest"
+  type        = string
+  default     = "us-central1-docker.pkg.dev/school-503805/school-prod/frontend:latest"
+  description = "Frontend image pushed to Artifact Registry by CI/CD (GitHub Actions deploy-prod.yml)"
 }
 
 variable "authorized_networks" {

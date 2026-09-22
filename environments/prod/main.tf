@@ -196,7 +196,7 @@ module "seed_job" {
 }
 
 # Marks as ABSENT every active student with no check-in once 40% of their
-# shift (entry→exit schedule) has elapsed. Idempotent; manual for now:
+# shift (entry→exit schedule) has elapsed. Idempotent. Scheduled below; manual run:
 #   gcloud run jobs execute school-prod-mark-absences --wait
 # Backfill a past day (cutoff ignored):
 #   gcloud run jobs execute school-prod-mark-absences --wait \
@@ -224,6 +224,60 @@ module "mark_absences_job" {
   secret_env_vars = {
     DATABASE_URL = { secret_id = module.secrets.secret_ids["${local.name_prefix}-database-url"] }
   }
+}
+
+# Runs mark-absences on weekdays after each shift's 40% cutoff (matutino
+# ~09:16, vespertino ~15:16). The job itself skips holidays: a shift with no
+# PRESENT/LATE check-ins that day is left untouched.
+resource "google_project_service" "cloudscheduler" {
+  project            = var.project_id
+  service            = "cloudscheduler.googleapis.com"
+  disable_on_destroy = false
+}
+
+module "absences_scheduler_sa" {
+  source       = "../../modules/iam"
+  project_id   = var.project_id
+  account_id   = "${local.name_prefix}-absences-sch"
+  display_name = "Cloud Scheduler trigger for mark-absences (${var.environment})"
+}
+
+resource "google_cloud_run_v2_job_iam_member" "absences_scheduler_invoker" {
+  project  = var.project_id
+  location = var.region
+  name     = module.mark_absences_job.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${module.absences_scheduler_sa.email}"
+}
+
+locals {
+  mark_absences_schedules = {
+    morning   = "0 10 * * 1-5"
+    afternoon = "30 15 * * 1-5"
+  }
+}
+
+resource "google_cloud_scheduler_job" "mark_absences" {
+  for_each  = local.mark_absences_schedules
+  project   = var.project_id
+  region    = var.region
+  name      = "${local.name_prefix}-mark-absences-${each.key}"
+  schedule  = each.value
+  time_zone = "America/Mexico_City"
+
+  http_target {
+    http_method = "POST"
+    uri         = "https://run.googleapis.com/v2/projects/${var.project_id}/locations/${var.region}/jobs/${module.mark_absences_job.name}:run"
+
+    oauth_token {
+      service_account_email = module.absences_scheduler_sa.email
+    }
+  }
+
+  depends_on = [
+    google_project_service.cloudscheduler,
+    google_cloud_run_v2_job_iam_member.absences_scheduler_invoker,
+  ]
 }
 
 # NOTE: VITE_API_URL is baked in at *build* time by Vite, not read at
