@@ -41,6 +41,7 @@ Solo staging por ahora. Los servicios viven en repos separados:
 | **DB** | Cloud SQL Postgres `db-f1-micro`, ZONAL, 10 GB. Backups off en piloto. |
 | **Migraciones** | Job `school-staging-migrate` (`prisma migrate deploy`). El CI del API lo ejecuta con `--wait` antes de cada deploy. |
 | **Seed** | Job `school-staging-seed` (`node dist/prisma/seed.js`). Manual — no corre en cada deploy. |
+| **Faltas** | Job `school-staging-mark-absences` (`node dist/src/jobs/mark-absences.js`). Manual — marca `ABSENT` a quien no tiene asistencia pasado el 40% de su turno. |
 | **Secrets** | Secret Manager (`DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`) inyectados como secret refs en Cloud Run. |
 | **CI/CD** | Workload Identity Federation → SAs deployer por repo (`my-school-api` / `my-school-app`). |
 | **Dominios** | Domain mappings opcionales; DNS fuera de este Terraform. |
@@ -151,6 +152,7 @@ terraform output
 | `artifact_registry_repository` | Destino de `docker push` |
 | `migrate_job_name` | `gcloud run jobs execute …` (migrate) |
 | `seed_job_name` | `gcloud run jobs execute …` (seed manual) |
+| `mark_absences_job_name` | `gcloud run jobs execute …` (marcar faltas, manual) |
 
 Siguiente: [docs/ci-cd-setup.md](docs/ci-cd-setup.md) y, si usas dominios custom, [docs/custom-domains.md](docs/custom-domains.md).
 

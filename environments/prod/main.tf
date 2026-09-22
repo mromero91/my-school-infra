@@ -195,6 +195,37 @@ module "seed_job" {
   }
 }
 
+# Marks as ABSENT every active student with no check-in once 40% of their
+# shift (entry→exit schedule) has elapsed. Idempotent; manual for now:
+#   gcloud run jobs execute school-prod-mark-absences --wait
+# Backfill a past day (cutoff ignored):
+#   gcloud run jobs execute school-prod-mark-absences --wait \
+#     --update-env-vars=ATTENDANCE_DATE=2026-09-22
+# Preview without writing: --update-env-vars=DRY_RUN=true
+module "mark_absences_job" {
+  source                            = "../../modules/cloud-run-job"
+  project_id                        = var.project_id
+  region                            = var.region
+  job_name                          = "${local.name_prefix}-mark-absences"
+  container_name                    = "mark-absences"
+  image                             = var.backend_image
+  service_account_email             = module.backend_sa.email
+  cloudsql_instance_connection_name = module.database.connection_name
+  command                           = ["node"]
+  args                              = ["dist/src/jobs/mark-absences.js"]
+  max_retries                       = 0
+
+  env_vars = {
+    NODE_ENV             = "production"
+    SCHOOL_TIMEZONE      = "America/Mexico_City"
+    ABSENCE_CUTOFF_RATIO = "0.4"
+  }
+
+  secret_env_vars = {
+    DATABASE_URL = { secret_id = module.secrets.secret_ids["${local.name_prefix}-database-url"] }
+  }
+}
+
 # NOTE: VITE_API_URL is baked in at *build* time by Vite, not read at
 # container runtime — setting it as a Cloud Run env var here does nothing
 # unless the frontend image's entrypoint does an envsubst/rebuild step.
