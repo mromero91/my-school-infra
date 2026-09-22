@@ -99,7 +99,7 @@ gcloud run jobs execute school-staging-seed \
   --project=school-503805 --region=us-central1 --wait
 ```
 
-## 5c. Marcar faltas (manual)
+## 5c. Marcar faltas (programado + manual)
 
 Terraform crea `school-<env>-mark-absences` (`node dist/src/jobs/mark-absences.js`).
 Por cada grupo, cuando ya pasó el 40% de su turno (horario de entrada → salida
@@ -124,10 +124,17 @@ gcloud run jobs execute school-staging-mark-absences \
   --update-env-vars=ATTENDANCE_DATE=2026-09-22
 ```
 
+**Programado:** Cloud Scheduler lo ejecuta de lunes a viernes a las **10:00**
+(matutino) y **15:30** (vespertino), hora de `America/Mexico_City`
+(`school-<env>-mark-absences-morning` / `-afternoon`). Si un turno no tiene
+ninguna asistencia (presente/retardo) ese día, se toma como asueto y no se
+marca nada. Para pausar: `gcloud scheduler jobs pause school-<env>-mark-absences-morning --location=us-central1`.
+
 Variables: `ABSENCE_CUTOFF_RATIO` (default `0.4`), `ATTENDANCE_DATE`,
-`ABSENCE_FORCE=true` (ignora corte y fin de semana), `DRY_RUN=true`.
+`ABSENCE_FORCE=true` (ignora corte, fin de semana y la regla de asueto), `DRY_RUN=true`.
 Los grupos sin horario de entrada **y** salida se omiten (queda en el log).
-No hay calendario de días inhábiles: no lo corras en festivos.
+Si hubo clases pero nadie escaneó (falla de QR), no se marca: corre el job con
+`ATTENDANCE_DATE` después de pasar lista.
 
 ## 6. Primer deploy
 

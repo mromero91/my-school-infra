@@ -41,7 +41,7 @@ Solo staging por ahora. Los servicios viven en repos separados:
 | **DB** | Cloud SQL Postgres `db-f1-micro`, ZONAL, 10 GB. Backups off en piloto. |
 | **Migraciones** | Job `school-staging-migrate` (`prisma migrate deploy`). El CI del API lo ejecuta con `--wait` antes de cada deploy. |
 | **Seed** | Job `school-staging-seed` (`node dist/prisma/seed.js`). Manual — no corre en cada deploy. |
-| **Faltas** | Job `school-staging-mark-absences` (`node dist/src/jobs/mark-absences.js`). Manual — marca `ABSENT` a quien no tiene asistencia pasado el 40% de su turno. |
+| **Faltas** | Job `school-staging-mark-absences` (`node dist/src/jobs/mark-absences.js`). Cloud Scheduler L–V 10:00 y 15:30 — marca `ABSENT` a quien no tiene asistencia pasado el 40% de su turno (salta turnos sin asistencias). |
 | **Secrets** | Secret Manager (`DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`) inyectados como secret refs en Cloud Run. |
 | **CI/CD** | Workload Identity Federation → SAs deployer por repo (`my-school-api` / `my-school-app`). |
 | **Dominios** | Domain mappings opcionales; DNS fuera de este Terraform. |
